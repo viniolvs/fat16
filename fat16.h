@@ -23,7 +23,7 @@ typedef struct BootRecord
  
 }__attribute__((packed)) BootRecord;
 
-typedef struct file83
+typedef struct format83
 {
 	unsigned char  filename[11];
 	unsigned char  attribute;
@@ -38,7 +38,7 @@ typedef struct file83
 	unsigned short first_cluster;
 	unsigned int   file_size;
 
-}__attribute__((packed)) file83;
+}__attribute__((packed)) format83;
 
 typedef unsigned short fat16;
 
@@ -49,7 +49,8 @@ int bytes2sectors(int bytes, int bytes_per_sector);
 
 void readBootRecord(BootRecord *br, FILE *file);
 
-void read83(file83 *f83, FILE *file);
+//lê uma struct 
+void read83(format83 *f83, FILE *file);
 
 //retorna o tamnho de  uma fat em bytes no arquivo
 int fatSize(BootRecord br);

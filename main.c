@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
 
     fat16 *fat=NULL;
     
-    file83 f83;
+    format83 f83;
     fseek(file, rootDirOffset(br), SEEK_SET);
     for (int j = 0; j < 4; j++)
     {

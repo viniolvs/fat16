@@ -21,9 +21,9 @@ void readBootRecord(BootRecord *br, FILE *file)
     fread(br, sizeof(BootRecord),1, file);
 }
 
-void read83(file83 *f83, FILE *file)
+void read83(format83 *f83, FILE *file)
 {
-    fread(f83, sizeof(file83),1, file);
+    fread(f83, sizeof(format83),1, file);
 }
 
 int fatSize(BootRecord br)
