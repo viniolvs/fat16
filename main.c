@@ -6,7 +6,7 @@ int main(int argc, char const *argv[])
 {
     char *filename = "fat16_4sectorpercluster.img";
     FILE *file;
-    openFile(file, filename);
+    file = openFile(filename);
     
     BootRecord br;
     readBootRecord(&br, file);
@@ -20,9 +20,10 @@ int main(int argc, char const *argv[])
         readFat(br, fat[i], i, file);
     }*/
 
-    fat16 *fat;
-    fat = newFat(br);
-    readFat(br,fat,1,file);
+    fat16 *fat=NULL;
+    
+    fat = readFat(br ,1,file);
+    printf("%x\n",fat[7]);
     
     return 0;
 }

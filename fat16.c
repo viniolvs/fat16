@@ -3,9 +3,11 @@
 #include <stdio.h>
 
 //
-void openFile(FILE *file, char *filename)
+FILE* openFile(char *filename)
 {
+    FILE *file;
     file = fopen(filename, "rb");
+    return file;
 }
 
 void readBootRecord(BootRecord *br, FILE *file)
@@ -26,10 +28,12 @@ fat16* newFat(BootRecord br)
     return fat;
 }
 
-void readFat(BootRecord br, fat16 *fat, int fat_number, FILE *file)
+fat16* readFat(BootRecord br, int fat_number, FILE *file)
 {
+    fat16 *fat = newFat(br);
     fseek(file, fatOffset(br,fat_number), SEEK_SET); 
     fread(fat, fatSize(br), 1,  file);
+    return fat;
 }
 
 //retorna a posição em bytes do diretório raiz a partir do byte 0

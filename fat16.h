@@ -26,7 +26,7 @@ typedef struct BootRecord
 typedef unsigned short fat16;
 
 //
-void openFile(FILE *file, char *filename);
+FILE* openFile(char *filename);
 
 void readBootRecord(BootRecord *br, FILE *file);
 
@@ -34,10 +34,10 @@ void readBootRecord(BootRecord *br, FILE *file);
 int fatSize(BootRecord br);
 
 //aloca uma fat
-fat16* newFat();
+fat16* newFat(BootRecord br);
 
 //lê uma fat no arquivo
-void readFat(BootRecord br, fat16 *fat, int fat_number, FILE *file);
+fat16* readFat(BootRecord br, int fat_number, FILE *file);
 
 //retorna a posição em bytes do diretório raiz a partir do byte 0
 int rootDirOffset(BootRecord br);
