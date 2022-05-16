@@ -46,9 +46,28 @@ fat16* readFat(BootRecord br, int fat_number, FILE *file)
     return fat;
 }
 
+format83* getRootDir(BootRecord br, FILE *file)
+{
+    format83 *f83 = (format83*)malloc(sizeof(format83) * br.root_entry_count);
+    fseek(file, rootDirOffset(br), SEEK_SET);
+    int k=0;
+    for (int i = 0; i < br.root_entry_count; i++)
+    {
+        read83(&f83[i], file);
+        if((f83[i].attribute == 0x10 || f83[i].attribute == 0x20) && (f83[i].filename[0] != 0xe) && (f83[i].filename[1] != 0x5))
+            k++;
+    }
+    format83 *aux = (format83*)malloc(sizeof(format83) * k);
+    for (int i = 0, k = 0; i < br.root_entry_count; i++)
+        if((f83[i].attribute == 0x10 || f83[i].attribute == 0x20) && (f83[i].filename[0] != 0xe) && (f83[i].filename[1] != 0x5))
+            aux[k++] = f83[i];
+    free(f83);
+    return aux;
+}
+
 int rootDirSize(BootRecord br)
 {
-    return ((br.root_entry_count * 32) + (br.bytes_per_sector - 1)) * br.bytes_per_sector;
+    return (dataSectionOffset(br) - rootDirOffset(br));
 }
 
 //retorna a posição em bytes do diretório raiz a partir do byte 0
