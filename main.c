@@ -13,17 +13,20 @@ int main(int argc, char const *argv[])
     printf("Bytes per sector %hd \n", br.bytes_per_sector);
     printf("Root Dir offset = %d\n", rootDirOffset(br));
 
-    /*fat16 *fat[br.table_count]; 
-    for (int i = 0; i < br.table_count; i++)
-    {
-        fat[i] = newFat(br);
-        readFat(br, fat[i], i, file);
-    }*/
-
     fat16 *fat=NULL;
     
-    fat = readFat(br ,1,file);
-    printf("%x\n",fat[7]);
+    file83 f83;
+    fseek(file, rootDirOffset(br), SEEK_SET);
+    for (int j = 0; j < 4; j++)
+    {
+        read83(&f83, file);
+        for (int i = 0; i < 11; i++)
+        {
+            printf("%c", f83.filename[i]);
+        }
+        printf("\n");
+        printf("%x\n", f83.attribute);
+    }
     
     return 0;
 }

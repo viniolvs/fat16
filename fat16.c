@@ -10,30 +10,45 @@ FILE* openFile(char *filename)
     return file;
 }
 
+int bytes2sectors(int bytes, int bytes_per_sector)
+{
+	return (bytes / bytes_per_sector);
+}
+
 void readBootRecord(BootRecord *br, FILE *file)
 {
     fseek(file, 0, SEEK_SET);
     fread(br, sizeof(BootRecord),1, file);
 }
 
-int fatSize(BootRecord br)
+void read83(file83 *f83, FILE *file)
 {
-    return br.table_size_16*br.bytes_per_sector;
+    fread(f83, sizeof(file83),1, file);
 }
 
-fat16* newFat(BootRecord br)
+int fatSize(BootRecord br)
+{
+    return (br.table_size_16 * br.bytes_per_sector);
+}
+
+fat16* newFat(int fat_size)
 {
     fat16 *fat;
-    fat = (fat16*)malloc(br.table_size_16 * br.bytes_per_sector);
+    fat = (fat16*)malloc(fat_size);
     return fat;
 }
 
 fat16* readFat(BootRecord br, int fat_number, FILE *file)
 {
-    fat16 *fat = newFat(br);
+    fat16 *fat = newFat(fatSize(br));
     fseek(file, fatOffset(br,fat_number), SEEK_SET); 
     fread(fat, fatSize(br), 1,  file);
     return fat;
+}
+
+int rootDirSize(BootRecord br)
+{
+    return ((br.root_entry_count * 32) + (br.bytes_per_sector - 1)) * br.bytes_per_sector;
 }
 
 //retorna a posição em bytes do diretório raiz a partir do byte 0

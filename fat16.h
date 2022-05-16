@@ -23,24 +23,47 @@ typedef struct BootRecord
  
 }__attribute__((packed)) BootRecord;
 
+typedef struct file83
+{
+	unsigned char  filename[11];
+	unsigned char  attribute;
+	unsigned char  windowsNT;
+	unsigned char  creation_time;
+	unsigned short time;
+	unsigned short date;
+	unsigned short last_access;
+	unsigned short high_first_cluster;
+	unsigned short last_modification_time;
+	unsigned short last_modification_date;
+	unsigned short first_cluster;
+	unsigned int   file_size;
+
+}__attribute__((packed)) file83;
+
 typedef unsigned short fat16;
 
 //
 FILE* openFile(char *filename);
 
+int bytes2sectors(int bytes, int bytes_per_sector);
+
 void readBootRecord(BootRecord *br, FILE *file);
+
+void read83(file83 *f83, FILE *file);
 
 //retorna o tamnho de  uma fat em bytes no arquivo
 int fatSize(BootRecord br);
 
 //aloca uma fat
-fat16* newFat(BootRecord br);
+fat16* newFat(int fat_size);
 
 //lê uma fat no arquivo
 fat16* readFat(BootRecord br, int fat_number, FILE *file);
 
 //retorna a posição em bytes do diretório raiz a partir do byte 0
 int rootDirOffset(BootRecord br);
+
+int rootDirSize(BootRecord br);
 
 //retorna a posição em bytes da fat<fat_number> a partir do byte 0
 int fatOffset(BootRecord br, short fat_number);
