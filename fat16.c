@@ -46,6 +46,35 @@ fat16* readFat(BootRecord br, int fat_number, FILE *file)
     return fat;
 }
 
+int getFileClusterCount(format83 f83, BootRecord br)
+{
+    int n=0;
+    if(f83.file_size%br.bytes_per_sector)
+        n = 1;
+    n+=(f83.file_size/br.bytes_per_sector) / br.sectors_per_cluster;
+    return n;
+}
+
+int* getFileClusters(BootRecord br,fat16 *fat, format83 f83)
+{
+    int cluster_count = getFileClusterCount(f83, br);
+    int *clusters = (int*)malloc(cluster_count);
+    unsigned short aux = fat[f83.first_cluster];
+    clusters[0] = f83.first_cluster;
+    for (int i = 1; i < cluster_count; i++)
+    {
+        clusters[i] = aux;
+        if(fat[aux]!=0xf)
+            aux = fat[aux];
+    }
+    return clusters;
+}
+
+int findCluster(BootRecord br, int cluster)
+{
+    return (dataSectionOffset(br) + (br.bytes_per_sector * br.sectors_per_cluster) * (cluster - 2)); 
+}
+
 format83* getRootDir(BootRecord br, FILE *file)
 {
     format83 *f83 = (format83*)malloc(sizeof(format83) * br.root_entry_count);
@@ -85,5 +114,5 @@ int fatOffset(BootRecord br, short fat_number)
 //retorna a posição em bytes da seção de dados a partir do byte 0
 int dataSectionOffset(BootRecord br)
 {
-    return (br.root_entry_count * 32) *  br.bytes_per_sector;
+    return br.root_entry_count * 32 + rootDirOffset(br);
 } 

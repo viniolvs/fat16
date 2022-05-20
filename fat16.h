@@ -61,6 +61,15 @@ fat16* newFat(int fat_size);
 //lê uma fat no arquivo
 fat16* readFat(BootRecord br, int fat_number, FILE *file);
 
+//retorna quantos cluster um arquivo usa
+int getFileClusterCount(format83 f83, BootRecord br);
+
+//retorna um vetor com os clusters de um arquivo
+int* getFileClusters(BootRecord br,fat16 *fat, format83 f83);
+
+//encontra um cluster na secão de dados
+int findCluster(BootRecord br, int cluster);
+
 format83* getRootDir(BootRecord br, FILE *file);
 
 //retorna a posição em bytes do diretório raiz a partir do byte 0
@@ -73,4 +82,3 @@ int fatOffset(BootRecord br, short fat_number);
 
 //retorna a posição em bytes da seção de dados a partir do byte 0
 int dataSectionOffset(BootRecord br); 
-
