@@ -67,6 +67,9 @@ int getFileClusterCount(format83 f83, BootRecord br);
 //retorna um vetor com os clusters de um arquivo
 int* getFileClusters(BootRecord br,fat16 *fat, format83 f83);
 
+//retorna tamnho do cluster em bytes
+int clusterSize(BootRecord br);
+
 //encontra um cluster na secão de dados
 int findCluster(BootRecord br, int cluster);
 
@@ -82,3 +85,6 @@ int fatOffset(BootRecord br, short fat_number);
 
 //retorna a posição em bytes da seção de dados a partir do byte 0
 int dataSectionOffset(BootRecord br); 
+
+//Leitura da seção de dados
+void printFile(BootRecord br, int *clusters, format83 f83, FILE *file);

@@ -55,10 +55,11 @@ int getFileClusterCount(format83 f83, BootRecord br)
     return n;
 }
 
-int* getFileClusters(BootRecord br,fat16 *fat, format83 f83)
+int* getFileClusters(BootRecord br, fat16 *fat, format83 f83)
 {
     int cluster_count = getFileClusterCount(f83, br);
     int *clusters = (int*)malloc(cluster_count);
+
     unsigned short aux = fat[f83.first_cluster];
     clusters[0] = f83.first_cluster;
     for (int i = 1; i < cluster_count; i++)
@@ -70,9 +71,14 @@ int* getFileClusters(BootRecord br,fat16 *fat, format83 f83)
     return clusters;
 }
 
+int clusterSize(BootRecord br)
+{
+    return (br.bytes_per_sector * br.sectors_per_cluster);
+}
+
 int findCluster(BootRecord br, int cluster)
 {
-    return (dataSectionOffset(br) + (br.bytes_per_sector * br.sectors_per_cluster) * (cluster - 2)); 
+    return (dataSectionOffset(br) + clusterSize(br) * (cluster - 2)); 
 }
 
 format83* getRootDir(BootRecord br, FILE *file)
@@ -115,4 +121,31 @@ int fatOffset(BootRecord br, short fat_number)
 int dataSectionOffset(BootRecord br)
 {
     return br.root_entry_count * 32 + rootDirOffset(br);
-} 
+}
+
+void printFile(BootRecord br, int *clusters, format83 f83, FILE *file)
+{
+    int file_size = f83.file_size;
+    int size = sizeof(clusters)/sizeof(clusters[0]);
+    int modulo = file_size % (size * clusterSize(br));
+    char *arquivo = NULL;
+
+    for (int i = 0; i < size; i++)
+    {
+        fseek(file,findCluster(br,clusters[i]), SEEK_SET);
+        if(arquivo != NULL)
+            free(arquivo);
+        if (i + 1 == size)
+        {
+            arquivo = (char*)malloc(modulo);
+            fread(arquivo, sizeof(char), modulo, file);
+        }
+        else
+        {
+            arquivo = (char*)malloc(clusterSize(br));
+            fread(arquivo, sizeof(char), clusterSize(br), file);
+        }
+        printf("%s",arquivo);
+    }
+    printf("\n");
+}

@@ -31,7 +31,9 @@ int main(int argc, char *argv[])
     for (int i = 0; i < 3; i++)
         printf("%d\n", file_clusters[i]);
     
+    printf("%d\n",rootDirOffset(br));
+    printf("%d\n",fatOffset(br,1));
     
-
+    printFile(br, file_clusters, f83[arq], file);
     return 0;
 }
