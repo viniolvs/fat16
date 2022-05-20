@@ -7,7 +7,7 @@
 int main(int argc, char *argv[])
 {
     //char *filename = argv[1];
-    char *filename = "fat16_4sectorpercluster.img";
+    char *filename = "fat16_1sectorpercluster.img";
     FILE *file;
     file = openFile(filename);
 
@@ -28,11 +28,6 @@ int main(int argc, char *argv[])
     fat = readFat(br,1,file);
 
     int *file_clusters = getFileClusters(br,fat,f83[arq]);
-    for (int i = 0; i < 3; i++)
-        printf("%d\n", file_clusters[i]);
-    
-    printf("%d\n",rootDirOffset(br));
-    printf("%d\n",fatOffset(br,1));
     
     printFile(br, file_clusters, f83[arq], file);
     return 0;
