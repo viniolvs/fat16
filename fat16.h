@@ -42,11 +42,11 @@ typedef struct format83
 
 typedef unsigned short fat16;
 
-//
 FILE* openFile(char *filename);
 
 int bytes2sectors(int bytes, int bytes_per_sector);
 
+//Lê o boot record
 void readBootRecord(BootRecord *br, FILE *file);
 
 //lê uma struct 
@@ -73,7 +73,8 @@ int clusterSize(BootRecord br);
 //encontra um cluster na secão de dados
 int findCluster(BootRecord br, int cluster);
 
-format83* getRootDir(BootRecord br, FILE *file);
+//Lê um diretório a partir de um offset no arquivo
+format83* readDir(BootRecord br, int offset, FILE *file);
 
 //retorna a posição em bytes do diretório raiz a partir do byte 0
 int rootDirOffset(BootRecord br);

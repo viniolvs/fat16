@@ -81,14 +81,16 @@ int findCluster(BootRecord br, int cluster)
     return (dataSectionOffset(br) + clusterSize(br) * (cluster - 2)); 
 }
 
-format83* getRootDir(BootRecord br, FILE *file)
+format83* readDir(BootRecord br, int offset, FILE *file)
 {
     format83 *f83 = (format83*)malloc(sizeof(format83) * br.root_entry_count);
-    fseek(file, rootDirOffset(br), SEEK_SET);
+    fseek(file, offset, SEEK_SET);
     int k=0;
     for (int i = 0; i < br.root_entry_count; i++)
     {
         read83(&f83[i], file);
+        if(f83[i].filename[0] == 0x0)
+            break;
         if((f83[i].attribute == 0x10 || f83[i].attribute == 0x20) && (f83[i].filename[0] != 0xe) && (f83[i].filename[1] != 0x5))
             k++;
     }
