@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-//
 FILE* openFile(char *filename)
 {
     FILE *file;
@@ -49,7 +48,9 @@ fat16* readFat(BootRecord br, int fat_number, FILE *file)
 int getFileClusterCount(format83 f83, BootRecord br)
 {
     int n=0;
-    if(f83.file_size%br.bytes_per_sector)
+    if (f83.file_size <= br.bytes_per_sector)
+        return 1;
+    else if(f83.file_size%br.bytes_per_sector)
         n = 1;
     n+=(f83.file_size/br.bytes_per_sector) / br.sectors_per_cluster;
     return n;
@@ -62,6 +63,7 @@ int* getFileClusters(BootRecord br, fat16 *fat, format83 f83)
 
     unsigned short aux = fat[f83.first_cluster];
     clusters[0] = f83.first_cluster;
+
     for (int i = 1; i < cluster_count; i++)
     {
         clusters[i] = aux;
@@ -83,21 +85,27 @@ int findCluster(BootRecord br, int cluster)
 
 format83* readDir(BootRecord br, int offset, FILE *file)
 {
-    format83 *f83 = (format83*)malloc(sizeof(format83) * br.root_entry_count);
+    format83 *f83 = (format83*)malloc(sizeof(format83));
     fseek(file, offset, SEEK_SET);
-    int k=0;
-    for (int i = 0; i < br.root_entry_count; i++)
+    int k=0, j, i, l = 0;
+    for (i = 0; ; i++, l++)
     {
-        read83(&f83[i], file);
-        if(f83[i].filename[0] == 0x0)
+        read83(f83, file);
+        if(f83->filename[0] == 0x0)
             break;
-        if((f83[i].attribute == 0x10 || f83[i].attribute == 0x20) && (f83[i].filename[0] != 0xe) && (f83[i].filename[1] != 0x5))
+        if((f83->attribute == 0x10 || f83->attribute == 0x20) && (f83->filename[0] != 0xe5))
             k++;
     }
+    if (k==0)
+        return NULL;
     format83 *aux = (format83*)malloc(sizeof(format83) * k);
-    for (int i = 0, k = 0; i < br.root_entry_count; i++)
-        if((f83[i].attribute == 0x10 || f83[i].attribute == 0x20) && (f83[i].filename[0] != 0xe) && (f83[i].filename[1] != 0x5))
-            aux[k++] = f83[i];
+    fseek(file, offset, SEEK_SET);
+    for (i = 0, j = 0; i < l; i++)
+    {
+        read83(f83, file);
+        if((f83->attribute == 0x10 || f83->attribute == 0x20) && (f83->filename[0] != 0xe5))
+            aux[j++] = *f83;
+    }
     free(f83);
     return aux;
 }
@@ -128,16 +136,14 @@ int dataSectionOffset(BootRecord br)
 void printFile(BootRecord br, int *clusters, format83 f83, FILE *file)
 {
     int file_size = f83.file_size;
-    int size = sizeof(clusters)/sizeof(clusters[0]);
-    int modulo = file_size % (size * clusterSize(br));
+    int count_cluster = getFileClusterCount(f83,br);
+    int modulo = file_size % (count_cluster * clusterSize(br));
     char *arquivo = NULL;
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < count_cluster; i++)
     {
         fseek(file,findCluster(br,clusters[i]), SEEK_SET);
-        if(arquivo != NULL)
-            free(arquivo);
-        if (i + 1 == size)
+        if (i + 1 == count_cluster)
         {
             arquivo = (char*)malloc(modulo);
             fread(arquivo, sizeof(char), modulo, file);
@@ -148,6 +154,8 @@ void printFile(BootRecord br, int *clusters, format83 f83, FILE *file)
             fread(arquivo, sizeof(char), clusterSize(br), file);
         }
         printf("%s",arquivo);
+        if(arquivo != NULL)
+            free(arquivo);
     }
     printf("\n");
 }

@@ -10,6 +10,11 @@ void filesMenu(BootRecord br, int offset, FILE *file)
     format83 *p;
     format83 *current_dir = readDir(br, offset, file);
     int i, arq;
+    if (current_dir == NULL)
+    {
+        printf("Diretório vazio!\n");
+        return;
+    }
     for(i = 0, p = current_dir; p->attribute == 0x10 || p->attribute == 0x20 ; i++, p++)
         printf("[%d] %s\n", i, p->filename);
     printf("Escolha qual arquivo ou subdiretório deseja acessar: \nDigite -1 para sair\n");
@@ -18,14 +23,20 @@ void filesMenu(BootRecord br, int offset, FILE *file)
         return;
     else if (current_dir[arq].attribute == 0x10)
     {
-        int dir_offset = findCluster(br, current_dir[arq].first_cluster);
-        filesMenu(br, dir_offset, file);
+        if(current_dir[arq].first_cluster == 0x0)
+            filesMenu(br, rootDirOffset(br), file);
+        else
+        {
+            int dir_offset = findCluster(br, current_dir[arq].first_cluster);
+            filesMenu(br, dir_offset, file);
+        }
     }
     else if(current_dir[arq].attribute == 0x20)       
     {
         fat16 *fat=NULL;
         fat = readFat(br,1,file);
-        int *file_clusters = getFileClusters(br, fat, current_dir[arq]);
+        int *file_clusters = NULL;
+        file_clusters = getFileClusters(br, fat, current_dir[arq]);
         printFile(br, file_clusters, current_dir[arq], file);
         free(fat);
         free(file_clusters);
@@ -35,8 +46,12 @@ void filesMenu(BootRecord br, int offset, FILE *file)
 
 int main(int argc, char *argv[])
 {
-    //char *filename = argv[1];
-    char *filename = "fat16_4sectorpercluster.img";
+    if (argc < 2)
+    {
+        printf("Insira o nome do arquivo de imagem!\n");
+        return 0;
+    }
+    char *filename = argv[1];
     FILE *file;
     file = openFile(filename);
 
