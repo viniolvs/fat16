@@ -31,7 +31,7 @@ void filesMenu(BootRecord br, int offset, FILE *file)
     //Caso seja um diretório
     else if (current_dir[arq].attribute == 0x10)
     {
-        //Verifica se está tentando acessar um diretório pai
+        //Verifica se está tentando acessar o diretório raiz
         if(current_dir[arq].first_cluster == 0x0)
             filesMenu(br, rootDirOffset(br), file);
         else
