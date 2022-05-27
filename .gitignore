@@ -54,3 +54,6 @@ dkms.conf
 #
 *.png
 *.txt
+
+#Executable
+exe
