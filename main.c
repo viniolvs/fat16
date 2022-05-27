@@ -20,7 +20,7 @@ void filesMenu(BootRecord br, int offset, FILE *file)
         return;
     }
     //Printa os arquivos | diretórios
-    for(i = 0, p = current_dir; p->attribute == 0x10 || p->attribute == 0x20 ; i++, p++)
+    for(i = 0, p = current_dir; p->attribute == 0x10 || p->attribute == 0x20  || p->attribute== 0x21; i++, p++)
         printf("[%d] %s\n", i, p->filename);
     printf("Escolha qual arquivo ou subdiretório deseja acessar: \nDigite -1 para sair\n");
     scanf("%d",&arq);
