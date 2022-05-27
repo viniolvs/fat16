@@ -163,33 +163,39 @@ void printFile(BootRecord br, int *clusters, format83 f83, FILE *file)
     int file_size = f83.file_size;
     //Recebe o número de clusters
     int count_cluster = getFileClusterCount(f83,br);
+    
+    //Calcula o tamanho do cluster
+    int cluster_size = clusterSize(br);
+
     //Verifica se possui um cluster "sobrando"
-    int modulo = file_size % (count_cluster * clusterSize(br));
-    //Vetor para leitura dos clusters
-    char *arquivo = NULL;
+    int modulo = 0;
+    if(file_size<cluster_size)
+        modulo = file_size;
+    else modulo =  (count_cluster * cluster_size) % file_size;
 
     for (int i = 0; i < count_cluster; i++)
     {
+        char arquivo;
+        int size_actual = 0;    
+        
         //Posiciona o ponteiro no inicio do cluster atual
         fseek(file,findCluster(br,clusters[i]), SEEK_SET);
         //Verifica se está no final do arquivo
         if (i + 1 == count_cluster && modulo != 0)
-        {
-            //Aloca um vetor de char para armazenar o tamanho (cluster com o tamanho do cluster "sobrando")
-            arquivo = (char*)malloc(modulo);
-            fread(arquivo, sizeof(char), modulo, file);
+        {  
+            size_actual = modulo;
         }
         else
         {
-            //Aloca um vetor de char para armazenar o tamanho (cluster com o tamanho do cluster inteiro)
-            arquivo = (char*)malloc(clusterSize(br));
-            fread(arquivo, sizeof(char), clusterSize(br), file);
+            size_actual = cluster_size;
         }
-        //Printa o arquivo
-        printf("%s",arquivo);
-        //Libera o vetor
-        if(arquivo != NULL)
-            free(arquivo);
+
+        for(int j=0;j<size_actual;j++){
+            fread(&arquivo,sizeof(char),1,file);
+            printf("%c",arquivo);
+        }
+
+        
     }
     printf("\n");
 }
