@@ -173,7 +173,7 @@ void printFile(BootRecord br, int *clusters, format83 f83, FILE *file)
         //Posiciona o ponteiro no inicio do cluster atual
         fseek(file,findCluster(br,clusters[i]), SEEK_SET);
         //Verifica se está no final do arquivo
-        if (i + 1 == count_cluster)
+        if (i + 1 == count_cluster && modulo != 0)
         {
             //Aloca um vetor de char para armazenar o tamanho (cluster com o tamanho do cluster "sobrando")
             arquivo = (char*)malloc(modulo);
